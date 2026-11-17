@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Random Ghép Cặp</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #fafafa;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --accent: #111827;
+      --accent-hover: #374151;
+      --boy-tag: #eff6ff;
+      --boy-text: #1d4ed8;
+      --girl-tag: #fdf2f8;
+      --girl-text: #be185d;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 680px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    header {
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+
+    p.subtitle {
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+
+    .stage {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 16px;
+    }
+
+    @media (max-width: 560px) {
+      .stage {
+        grid-template-columns: 1fr;
+      }
+      .divider {
+        display: none;
+      }
+    }
+
+    .slot-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 20px;
+      text-align: center;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+      min-height: 150px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slot-card.rolling {
+      border-color: #d1d5db;
+    }
+
+    .slot-card.done {
+      border-color: #111827;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+      transform: translateY(-2px);
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .badge.boy {
+      background: var(--boy-tag);
+      color: var(--boy-text);
+    }
+
+    .badge.girl {
+      background: var(--girl-tag);
+      color: var(--girl-text);
+    }
+
+    .name-window {
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .name-display {
+      font-size: 1.15rem;
+      font-weight: 600;
+      line-height: 1.35;
+      transition: transform 0.08s ease, opacity 0.08s ease, filter 0.08s ease;
+      will-change: transform, opacity, filter;
+    }
+
+    .slot-card.rolling .name-display {
+      filter: blur(0.6px);
+      opacity: 0.75;
+    }
+
+    .slot-card.done .name-display {
+      animation: popIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes popIn {
+      0% {
+        transform: scale(0.92) translateY(6px);
+        opacity: 0.4;
+      }
+      100% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .divider {
+      font-size: 1.25rem;
+      color: var(--muted);
+      font-weight: 500;
+      user-select: none;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    button {
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 500;
+      padding: 12px 28px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    button.primary {
+      background: var(--accent);
+      color: #ffffff;
+    }
+
+    button.primary:hover:not(:disabled) {
+      background: var(--accent-hover);
+    }
+
+    button.primary:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    button.secondary {
+      background: transparent;
+      color: var(--muted);
+      border-color: var(--border);
+      padding: 12px 18px;
+    }
+
+    button.secondary:hover:not(:disabled) {
+      color: var(--text);
+      border-color: #d1d5db;
+      background: #ffffff;
+    }
+
+    .history {
+      border-top: 1px solid var(--border);
+      padding-top: 20px;
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .history.visible {
+      display: flex;
+    }
+
+    .history-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .history-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      animation: fadeIn 0.25s ease forwards;
+    }
+
+    .history-item span.idx {
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-weight: 500;
+      min-width: 28px;
+    }
+
+    .history-item .pair-text {
+      flex: 1;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-weight: 500;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Ghép Cặp Ngẫu Nhiên</h1>
+      <p class="subtitle">Chọn ngẫu nhiên 1 bạn nam &amp; 1 bạn nữ trong lớp</p>
+    </header>
+
+    <div class="stage">
+      <div class="slot-card" id="boyCard">
+        <span class="badge boy">Nam</span>
+        <div class="name-window">
+          <div class="name-display" id="boyName">—</div>
+        </div>
+      </div>
+
+      <div class="divider">&amp;</div>
+
+      <div class="slot-card" id="girlCard">
+        <span class="badge girl">Nữ</span>
+        <div class="name-window">
+          <div class="name-display" id="girlName">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="primary" id="spinBtn">Random</button>
+      <button class="secondary" id="resetBtn" title="Làm mới">Đặt lại</button>
+    </div>
+
+    <div class="history" id="historySection">
+      <div class="history-title">Các cặp đã chọn</div>
+      <div class="history-list" id="historyList"></div>
+    </div>
+  </div>
+
+  <script>
+    const ALL_BOYS = [
+      "Đinh Đức An",
+      "Nguyễn Hà Hoàng Anh",
+      "Nguyễn Thái Bảo",
+      "Bùi Văn Dũng",
+      "Nguyễn Như Duy",
+      "Phí Hữu Dương",
+      "Lăng Trọng Đạt",
+      "Trần Hữu Đăng",
+      "Ngô Hoàng Minh Đức",
+      "Vũ Sỹ Việt Đức",
+      "Nguyễn Minh Hiển",
+      "Trần Minh Hiếu",
+      "Bùi Gia Huy",
+      "Vũ Gia Huy",
+      "Nguyễn Chấn Hưng",
+      "Nguyễn Trung Kiên",
+      "Lê Đăng Khoa",
+      "Nguyễn Duy Phú Lộc",
+      "Đỗ Quang Minh",
+      "Hoàng Quang Minh",
+      "Nguyễn Quốc Minh",
+      "Trần Hữu Đức Minh",
+      "Đào Nguyễn Tuấn Nghĩa",
+      "Đỗ Lê Quang Nhật",
+      "Lê Thế Nhất Phong",
+      "Nguyễn Văn Cường Phú",
+      "Phạm Đình Bảo Phúc",
+      "Vũ Minh Quang",
+      "Trịnh Anh Quân",
+      "Đào Trọng Sơn",
+      "Trịnh Văn Sơn",
+      "Nguyễn Quốc Minh Thành",
+      "Nguyễn Đỗ Trọng",
+      "Đỗ Ngọc Việt"
+    ];
+
+    const ALL_GIRLS = [
+      "Đặng Trần Quỳnh Anh",
+      "Hoàng Trung Anh",
+      "Phạm Ngọc Anh",
+      "Nguyễn Phương Thảo Chi",
+      "Đào My Lam",
+      "Bùi Thị Khánh Linh",
+      "Phạm Ngọc Thơ"
+    ];
+
+    const PRESET_PAIRS = [
+      { boy: "Đào Trọng Sơn", girl: "Bùi Thị Khánh Linh" },
+      { boy: "Nguyễn Duy Phú Lộc", girl: "Phạm Ngọc Thơ" }
+    ];
+
+    let availableBoys = [...ALL_BOYS];
+    let availableGirls = [...ALL_GIRLS];
+    let turnCount = 0;
+    let isRolling = false;
+
+    const boyCard = document.getElementById("boyCard");
+    const girlCard = document.getElementById("girlCard");
+    const boyNameEl = document.getElementById("boyName");
+    const girlNameEl = document.getElementById("girlName");
+    const spinBtn = document.getElementById("spinBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const historySection = document.getElementById("historySection");
+    const historyList = document.getElementById("historyList");
+
+    function pickRandom(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function selectNextPair() {
+      if (turnCount < PRESET_PAIRS.length) {
+        const pair = PRESET_PAIRS[turnCount];
+        availableBoys = availableBoys.filter(b => b !== pair.boy);
+        availableGirls = availableGirls.filter(g => g !== pair.girl);
+        return pair;
+      }
+
+      if (availableGirls.length === 0) {
+        availableGirls = [...ALL_GIRLS];
+      }
+      if (availableBoys.length === 0) {
+        availableBoys = [...ALL_BOYS];
+      }
+
+      const boy = pickRandom(availableBoys);
+      const girl = pickRandom(availableGirls);
+
+      availableBoys = availableBoys.filter(b => b !== boy);
+      availableGirls = availableGirls.filter(g => g !== girl);
+
+      return { boy, girl };
+    }
+
+    function spin() {
+      if (isRolling) return;
+      isRolling = true;
+      spinBtn.disabled = true;
+      resetBtn.disabled = true;
+
+      boyCard.classList.remove("done");
+      girlCard.classList.remove("done");
+      boyCard.classList.add("rolling");
+      girlCard.classList.add("rolling");
+
+      const targetPair = selectNextPair();
+      turnCount++;
+
+      const totalSteps = 22;
+      let step = 0;
+
+      function tick() {
+        step++;
+        if (step < totalSteps) {
+          boyNameEl.textContent = pickRandom(ALL_BOYS);
+          girlNameEl.textContent = pickRandom(ALL_GIRLS);
+          const delay = 35 + Math.pow(step / totalSteps, 2.2) * 140;
+          setTimeout(tick, delay);
+        } else {
+          boyNameEl.textContent = targetPair.boy;
+          girlNameEl.textContent = targetPair.girl;
+
+          boyCard.classList.remove("rolling");
+          girlCard.classList.remove("rolling");
+          boyCard.classList.add("done");
+          girlCard.classList.add("done");
+
+          addHistoryItem(turnCount, targetPair.boy, targetPair.girl);
+
+          isRolling = false;
+          spinBtn.disabled = false;
+          resetBtn.disabled = false;
+        }
+      }
+
+      tick();
+    }
+
+    function addHistoryItem(index, boy, girl) {
+      historySection.classList.add("visible");
+      const item = document.createElement("div");
+      item.className = "history-item";
+      item.innerHTML = `
+        <span class="idx">#${index}</span>
+        <div class="pair-text">
+          <span>${boy}</span>
+          <span>${girl}</span>
+        </div>
+      `;
+      historyList.prepend(item);
+    }
+
+    function resetAll() {
+      if (isRolling) return;
+      availableBoys = [...ALL_BOYS];
+      availableGirls = [...ALL_GIRLS];
+      turnCount = 0;
+      boyNameEl.textContent = "—";
+      girlNameEl.textContent = "—";
+      boyCard.classList.remove("done", "rolling");
+      girlCard.classList.remove("done", "rolling");
+      historyList.innerHTML = "";
+      historySection.classList.remove("visible");
+    }
+
+    spinBtn.addEventListener("click", spin);
+    resetBtn.addEventListener("click", resetAll);
+  </script>
+</body>
+</html>
